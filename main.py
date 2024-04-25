@@ -124,7 +124,7 @@ def main():
             st.info("Correct answer: " + correct_answer + "Feedback: " + data.loc[st.session_state.current_question, 'Feedback A'])
             st.info("Feedback for other options:")
             for option in incorrect_answers:
-                st.info(option + ": " + data.loc[st.session_state.current_question, options_dict[option]])        
+                st.write(option + ": feedback: " + options_dict[option])        
         if st.session_state.current_question < len(data) - 1:
             st.session_state.current_question += 1
         else:
