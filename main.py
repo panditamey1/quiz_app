@@ -19,14 +19,21 @@ def gen_quiz(question_number,df, key="my-form"):
     form.write(df.loc[question, "Question"])
     options = df.loc[question, "Options"].split(", ")
     correct_answer = df.loc[question, "Answer"]
-    user_answer = form.radio("Options", options)
-    if user_answer == correct_answer:
-        form.write("Correct!")
-    else:
-        form.write(f"Wrong! The correct answer is {correct_answer}")
-    form.write("Explanation")
-    form.write(df.loc[question, "Explanation"])
-
+    selected_answer = form.radio("Options", options)
+    submit = form.form_submit_button("Submit")
+    if submit:
+        if selected_answer == correct_answer:
+            st.write("Correct!")
+            st.info("Explanation: " + df.loc[question, "Explanation"])
+        else:
+            st.write(f"Wrong! The correct answer is {correct_answer}")
+            st.info("Explanation: " + df.loc[question, "Explanation"])
+        if question_number < len(df) - 1:
+            form.write("Next question")
+            next_question = form.number_input(
+                "Question Number:", min_value=0, max_value=len(df)-1, value=question_number+1, step=1
+            )
+            gen_quiz(next_question,df)
 
 
 def main():
