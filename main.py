@@ -23,7 +23,7 @@ def gen_quiz(question_number,df, key="my-form"):
     incorrect_answers = df.loc[question, ["Option B (Incorrect)", "Option C (Incorrect)"]].dropna()
     options = [correct_answer] + list(incorrect_answers)
     random.shuffle(options)
-    
+
     selected_answer = form.radio("Options", options)
     submit = form.form_submit_button("Submit")
     if submit:
@@ -35,10 +35,13 @@ def gen_quiz(question_number,df, key="my-form"):
             st.info("Explanation: " + df.loc[question, "Explanation"])
         if question_number < len(df) - 1:
             form.write("Next question")
-            next_question = form.number_input(
-                "Question Number:", min_value=0, max_value=len(df)-1, value=question_number+1, step=1
-            )
-            gen_quiz(next_question,df)
+
+    next_question_button = form.form_submit_button("Next Question")
+    if next_question_button:
+        next_question = form.number_input(
+            "Question Number:", min_value=0, max_value=len(df)-1, value=question_number+1, step=1
+        )
+        gen_quiz(next_question,df)
 
 
 def main():
