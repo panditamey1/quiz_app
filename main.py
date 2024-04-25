@@ -34,7 +34,7 @@ def gen_quiz(question_number,df, key="my-form"):
     random.shuffle(options)
 
     selected_answer = form.radio("Options", options)
-    submit = form.form_submit_button("Submit")
+    submit = form.button("Submit")
     if submit:
         if selected_answer == correct_answer:
             st.write("Correct!")
@@ -45,7 +45,11 @@ def gen_quiz(question_number,df, key="my-form"):
             st.info ("Feedback for other options:")
             for option in incorrect_answers:
                 st.info(f"{option}: {options_dict[option]}")
-
+    next_question_button = form.form_submit_button("Next Question")
+    if next_question_button:
+        question += 1
+        st.session_state.question_number = question
+        gen_quiz(question,df)
 
 
 
@@ -65,18 +69,18 @@ def main():
     # Randomize the order of the rows
     df = df.sample(frac=1).reset_index(drop=True)
 
-    form2 = st.form(key="my-form-2")
+    # form2 = st.form(key="my-form-2")
     st.session_state.question_number = 0
-    next_question = form2.number_input(
-        "Question Number:", min_value=0, max_value=len(df)-1, value=st.session_state.question_number, key="question_number"
-    )
+    # next_question = form2.number_input(
+    #     "Question Number:", min_value=0, max_value=len(df)-1, value=st.session_state.question_number, key="question_number"
+    # )
     
     
-    next_question_button = form2.form_submit_button("Next Question")
-    if next_question_button:
-        next_question += 1
-        st.session_state.question_number = next_question
-        gen_quiz(next_question,df)
+    # next_question_button = form2.form_submit_button("Next Question")
+    # if next_question_button:
+    #     next_question += 1
+    #     st.session_state.question_number = next_question
+    gen_quiz(st.session_state.question_number,df)
 
     # Display the questions one by one
     
