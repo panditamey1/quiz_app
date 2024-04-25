@@ -75,14 +75,15 @@ def main():
     # if next_question_button:
     #     next_question += 1
     #     st.session_state.question_number = next_question
-    with st.form(key="my-form2"):
-        question = st.session_state.question_number
+    
+    question = st.session_state.question_number
+    if st.session_state.question_number == 0:
         gen_quiz(st.session_state.question_number,df)
-        next_question_button = st.form_submit_button("Next Question")
-        if next_question_button:
-            question += 1
-            st.session_state.question_number = question
-            gen_quiz(question,df)
+    next_question_button = st.button("Next Question")
+    if next_question_button:
+        question += 1
+        st.session_state.question_number = question
+        gen_quiz(question,df)
 
     # Display the questions one by one
     
