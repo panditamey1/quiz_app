@@ -71,7 +71,7 @@ def main():
         "Question Number:", min_value=0, max_value=len(df)-1, value=st.session_state.question_number, key="question_number"
     )
     
-    gen_quiz(next_question,df)
+    
     next_question_button = form2.form_submit_button("Next Question")
     if next_question_button:
         next_question += 1
