@@ -36,12 +36,7 @@ def gen_quiz(question_number,df, key="my-form"):
         if question_number < len(df) - 1:
             form.write("Next question")
 
-    next_question_button = form.form_submit_button("Next Question")
-    if next_question_button:
-        next_question = form.number_input(
-            "Question Number:", min_value=0, max_value=len(df)-1, value=question_number+1, step=1
-        )
-        gen_quiz(next_question,df)
+
 
 
 def main():
@@ -61,9 +56,14 @@ def main():
     curr_question = st.number_input(
             "Question Number:", min_value=0, max_value=len(df)-1, value=0, step=1
         )
-
+    form2 = st.form(key="my-form-2")
     gen_quiz(curr_question,df)
-
+    next_question_button = form2.form_submit_button("Next Question")
+    if next_question_button:
+        next_question = form2.number_input(
+            "Question Number:", min_value=0, max_value=len(df)-1, value=curr_question+1, step=1
+        )
+        gen_quiz(next_question,df)
 
     # Display the questions one by one
     
