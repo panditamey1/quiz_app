@@ -12,41 +12,6 @@ def load_csvs(folder_path):
             dfs.append(df)
     combined_df = pd.concat(dfs, ignore_index=True)
     return combined_df
-def gen_quiz(question_number,df, key="my-form"):
-    form = st.form(key=key)
-    question = question_number
-    form.write(f"Question {question_number + 1}")
-    form.write(df.loc[question, "Question"])
-    # Learning Objective,Question,Option A (Correct),Option B (Incorrect),Option C (Incorrect),Feedback A,Feedback B,Feedback C
-    # create dictionary of options and then shuffle
-    options_dict = {
-        df.loc[question, "Option A (Correct)"]: df.loc[question, "Feedback A"],
-        df.loc[question, "Option B (Incorrect)"]: df.loc[question, "Feedback B"],
-        df.loc[question, "Option C (Incorrect)"]: df.loc[question, "Feedback C"],
-    }
-    list_of_options = list(options_dict.items())
-    random.shuffle(list_of_options)
-    
-    correct_answer = df.loc[question, "Option A (Correct)"]
-    incorrect_answers = df.loc[question, ["Option B (Incorrect)", "Option C (Incorrect)"]].dropna()
-
-    options = [correct_answer] + list(incorrect_answers)
-    random.shuffle(options)
-
-    selected_answer = form.radio("Options", options)
-    submit = form.form_submit_button("Submit")
-    if submit:
-        if selected_answer == correct_answer:
-            form.write("Correct!")
-            form.info("Explanation: " + options_dict[correct_answer])
-        else:
-            form.write(f"Wrong! The correct answer is {correct_answer}")
-            form.info("Explanation: " + df.loc[question, 'Feedback A'])
-            form.info ("Feedback for other options:")
-            for option in incorrect_answers:
-                form.info(f"{option}: {options_dict[option]}")
-
-
 
 
 def main():
@@ -54,42 +19,14 @@ def main():
     csvs_folder = "csvs"
     if not os.path.exists(csvs_folder):
         os.makedirs(csvs_folder)
-        # give option to upload files
         st.write("Please upload the CSV files to the 'csvs' folder")
     data = load_csvs(csvs_folder)
 
     # Randomize the order of the rows
     data = data.sample(frac=1).reset_index(drop=True)
     st.title("Quiz App")
-    st.session_state.question_number = 0
-    question = st.session_state.question_number
 
-
-        # form2 = st.form(key="my-form-2")
-        
-        # next_question = form2.number_input(
-        #     "Question Number:", min_value=0, max_value=len(df)-1, value=st.session_state.question_number, key="question_number"
-        # )
-        
-        
-        # next_question_button = form2.form_submit_button("Next Question")
-        # if next_question_button:
-        #     next_question += 1
-        #     st.session_state.question_number = next_question
-        
-
-    #     gen_quiz(st.session_state.question_number,df)
-    # next_question_button = st.button("Next Question")
-    # if next_question_button:
-    #     question += 1
-    #     st.session_state.question_number = question
-    #     gen_quiz(question,df)
-
-
-    # Load the CSV file
-
-
-    # Initialize session state variables
+    # Initialize session state variables if not already present
     if 'current_question' not in st.session_state:
         st.session_state.current_question = 0
     if 'score' not in st.session_state:
@@ -99,32 +36,27 @@ def main():
     st.title(data.loc[st.session_state.current_question, 'Learning Objective'])
     st.write(data.loc[st.session_state.current_question, 'Question'])
     options_dict = {
-        data.loc[st.session_state.current_question, "Option A (Correct)"]: data.loc[st.session_state.current_question, "Feedback A"],
-        data.loc[st.session_state.current_question, "Option B (Incorrect)"]: data.loc[st.session_state.current_question, "Feedback B"],
-        data.loc[st.session_state.current_question, "Option C (Incorrect)"]: data.loc[st.session_state.current_question, "Feedback C"],
+        data.loc[st.session_state.current_question, "Option A (Correct)"]: "Feedback A",
+        data.loc[st.session_state.current_question, "Option B (Incorrect)"]: "Feedback B",
+        data.loc[st.session_state.current_question, "Option C (Incorrect)"]: "Feedback C",
     }
-    list_of_options = list(options_dict.items())
-    random.shuffle(list_of_options)
-    
-    correct_answer = data.loc[st.session_state.current_question, "Option A (Correct)"]
-    incorrect_answers = data.loc[st.session_state.current_question, ["Option B (Incorrect)", "Option C (Incorrect)"]].dropna()
-
-    options = [correct_answer] + list(incorrect_answers)
+    options = list(options_dict.keys())
     random.shuffle(options)
 
-    # Option buttons
-
-    feedbacks = ['Feedback A', 'Feedback B', 'Feedback C']
+    # Option buttons and feedback display
     def handle_answer(index):
-        if "Correct" in options_dict[options[index]]:
+        option_chosen = options[index]
+        if "Correct" in option_chosen:
             st.session_state.score += 1
-            st.success("Correct! " + data.loc[st.session_state.current_question, options_dict[options[index]]])
+            st.success("Correct! " + data.loc[st.session_state.current_question, options_dict[option_chosen]])
         else:
-            # st.error("Wrong! " + data.loc[st.session_state.current_question, options_dict[options[index]]])
-            st.info("Correct answer: " + correct_answer + "Feedback: " + data.loc[st.session_state.current_question, 'Feedback A'])
-            st.info("Feedback for other options:")
-            for option in incorrect_answers:
-                st.write(option + ": feedback: " + options_dict[option])        
+            st.error(f"Wrong! The correct answer was {data.loc[st.session_state.current_question, 'Option A (Correct)']}.\nFeedback: {data.loc[st.session_state.current_question, options_dict[option_chosen]]}")
+
+    for i, option in enumerate(options):
+        st.button(option.split('(')[0], on_click=handle_answer, args=(i,))
+
+    # Next question button
+    if st.button('Next Question'):
         if st.session_state.current_question < len(data) - 1:
             st.session_state.current_question += 1
         else:
@@ -132,12 +64,5 @@ def main():
             st.session_state.current_question = 0  # Reset for next run
             st.session_state.score = 0  # Reset score
 
-    for i, option in enumerate(options):
-        st.button(option.split('(')[0], on_click=handle_answer, args=(i,))
-
-
-
-    # Display the questions one by one
-    
 if __name__ == "__main__":
     main()
