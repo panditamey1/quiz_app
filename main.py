@@ -34,7 +34,7 @@ def gen_quiz(question_number,df, key="my-form"):
     random.shuffle(options)
 
     selected_answer = form.radio("Options", options)
-    submit = form.button("Submit")
+    submit = st.button("Submit")
     if submit:
         if selected_answer == correct_answer:
             st.write("Correct!")
@@ -45,7 +45,7 @@ def gen_quiz(question_number,df, key="my-form"):
             st.info ("Feedback for other options:")
             for option in incorrect_answers:
                 st.info(f"{option}: {options_dict[option]}")
-    next_question_button = form.form_submit_button("Next Question")
+    next_question_button = st.form_submit_button("Next Question")
     if next_question_button:
         question += 1
         st.session_state.question_number = question
