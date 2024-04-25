@@ -13,7 +13,6 @@ def load_csvs(folder_path):
     combined_df = pd.concat(dfs, ignore_index=True)
     return combined_df
 
-
 def main():
     # Load CSV files from the "csvs" folder
     csvs_folder = "csvs"
@@ -31,14 +30,17 @@ def main():
         st.session_state.current_question = 0
     if 'score' not in st.session_state:
         st.session_state.score = 0
+    if 'advance' not in st.session_state:
+        st.session_state.advance = False
 
     # Display the current question
-    st.title(data.loc[st.session_state.current_question, 'Learning Objective'])
-    st.write(data.loc[st.session_state.current_question, 'Question'])
+    question_data = data.loc[st.session_state.current_question]
+    st.title(question_data['Learning Objective'])
+    st.write(question_data['Question'])
     options_dict = {
-        data.loc[st.session_state.current_question, "Option A (Correct)"]: "Feedback A",
-        data.loc[st.session_state.current_question, "Option B (Incorrect)"]: "Feedback B",
-        data.loc[st.session_state.current_question, "Option C (Incorrect)"]: "Feedback C",
+        question_data["Option A (Correct)"]: "Feedback A",
+        question_data["Option B (Incorrect)"]: "Feedback B",
+        question_data["Option C (Incorrect)"]: "Feedback C",
     }
     options = list(options_dict.keys())
     random.shuffle(options)
