@@ -66,15 +66,16 @@ def main():
     df = df.sample(frac=1).reset_index(drop=True)
 
     form2 = st.form(key="my-form-2")
-    curr_question = st.number_input(
-            "Question Number:", min_value=0, max_value=len(df)-1, value=0, step=1
-        )    
-    gen_quiz(curr_question,df)
+    st.session_state.question_number = 0
+    next_question = form2.number_input(
+        "Question Number:", min_value=0, max_value=len(df)-1, value=st.session_state.question_number, key="question_number"
+    )
+    
+    gen_quiz(next_question,df)
     next_question_button = form2.form_submit_button("Next Question")
     if next_question_button:
-        next_question = form2.number_input(
-            "Question Number:", min_value=0, max_value=len(df)-1, value=curr_question+1, step=1
-        )
+        next_question += 1
+        st.session_state.question_number = next_question
         gen_quiz(next_question,df)
 
     # Display the questions one by one
