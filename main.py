@@ -17,8 +17,13 @@ def gen_quiz(question_number,df, key="my-form"):
     question = question_number
     form.write(f"Question {question_number + 1}")
     form.write(df.loc[question, "Question"])
-    options = df.loc[question, "Options"].split(", ")
-    correct_answer = df.loc[question, "Answer"]
+    # Learning Objective,Question,Option A (Correct),Option B (Incorrect),Option C (Incorrect),Feedback A,Feedback B,Feedback C
+
+    correct_answer = df.loc[question, "Option A (Correct)"]
+    incorrect_answers = df.loc[question, ["Option B (Incorrect)", "Option C (Incorrect)"]].dropna()
+    options = [correct_answer] + list(incorrect_answers)
+    random.shuffle(options)
+    
     selected_answer = form.radio("Options", options)
     submit = form.form_submit_button("Submit")
     if submit:
