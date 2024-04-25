@@ -56,15 +56,14 @@ def main():
         os.makedirs(csvs_folder)
         # give option to upload files
         st.write("Please upload the CSV files to the 'csvs' folder")
+    df = load_csvs(csvs_folder)
 
+    # Randomize the order of the rows
+    df = df.sample(frac=1).reset_index(drop=True)
     st.title("Quiz App")
     st.session_state.question_number = 0
     question = st.session_state.question_number
-    if st.session_state.question_number == 0:
-        df = load_csvs(csvs_folder)
 
-        # Randomize the order of the rows
-        df = df.sample(frac=1).reset_index(drop=True)
 
         # form2 = st.form(key="my-form-2")
         
@@ -79,12 +78,54 @@ def main():
         #     st.session_state.question_number = next_question
         
 
-        gen_quiz(st.session_state.question_number,df)
-    next_question_button = st.button("Next Question")
-    if next_question_button:
-        question += 1
-        st.session_state.question_number = question
-        gen_quiz(question,df)
+    #     gen_quiz(st.session_state.question_number,df)
+    # next_question_button = st.button("Next Question")
+    # if next_question_button:
+    #     question += 1
+    #     st.session_state.question_number = question
+    #     gen_quiz(question,df)
+    import streamlit as st
+    import pandas as pd
+    import random
+
+    # Load the CSV file
+    data = pd.read_csv('quiz_data.csv')
+
+    # Shuffle the rows of the dataframe
+    data = data.sample(frac=1).reset_index(drop=True)
+
+    # Initialize session state variables
+    if 'current_question' not in st.session_state:
+        st.session_state.current_question = 0
+    if 'score' not in st.session_state:
+        st.session_state.score = 0
+
+    # Display the current question
+    st.title(data.loc[st.session_state.current_question, 'Learning Objective'])
+    st.write(data.loc[st.session_state.current_question, 'Question'])
+
+    # Option buttons
+    options = ['Option A (Correct)', 'Option B (Incorrect)', 'Option C (Incorrect)']
+    random.shuffle(options)  # Shuffle options
+    feedbacks = ['Feedback A', 'Feedback B', 'Feedback C']
+    def handle_answer(index):
+        if "Correct" in options[index]:
+            st.session_state.score += 1
+            st.success("Correct! " + data.loc[st.session_state.current_question, feedbacks[index]])
+        else:
+            st.error("Wrong! " + data.loc[st.session_state.current_question, feedbacks[index]])
+        
+        if st.session_state.current_question < len(data) - 1:
+            st.session_state.current_question += 1
+        else:
+            st.write("Quiz completed! Your score is:", st.session_state.score)
+            st.session_state.current_question = 0  # Reset for next run
+            st.session_state.score = 0  # Reset score
+
+    for i, option in enumerate(options):
+        st.button(option.split('(')[0], on_click=handle_answer, args=(i,))
+
+
 
     # Display the questions one by one
     
