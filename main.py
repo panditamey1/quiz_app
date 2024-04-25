@@ -121,7 +121,7 @@ def main():
             st.success("Correct! " + data.loc[st.session_state.current_question, options_dict[options[index]]])
         else:
             # st.error("Wrong! " + data.loc[st.session_state.current_question, options_dict[options[index]]])
-            st.info("Correct answer: " + correct_answer, data.loc[st.session_state.current_question, 'Feedback A'])
+            st.info("Correct answer: " + correct_answer + "Feedback: " + data.loc[st.session_state.current_question, 'Feedback A'])
             st.info("Feedback for other options:")
             for option in incorrect_answers:
                 st.info(option + ": " + data.loc[st.session_state.current_question, options_dict[option]])        
