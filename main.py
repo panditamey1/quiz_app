@@ -84,9 +84,7 @@ def main():
     #     question += 1
     #     st.session_state.question_number = question
     #     gen_quiz(question,df)
-    import streamlit as st
-    import pandas as pd
-    import random
+
 
     # Load the CSV file
     data = pd.read_csv('quiz_data.csv')
