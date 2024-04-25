@@ -14,6 +14,8 @@ def load_csvs(folder_path):
     return combined_df
 
 def main():
+    st.title("Quiz App")
+
     # Load CSV files from the "csvs" folder
     csvs_folder = "csvs"
     if not os.path.exists(csvs_folder):
@@ -21,47 +23,54 @@ def main():
         st.write("Please upload the CSV files to the 'csvs' folder")
     data = load_csvs(csvs_folder)
 
-    # Randomize the order of the rows
-    data = data.sample(frac=1).reset_index(drop=True)
-    st.title("Quiz App")
-
+    # Randomize the order of the rows once and store in session state
+    if 'data' not in st.session_state:
+        st.session_state.data = data.sample(frac=1).reset_index(drop=True)
+    
     # Initialize session state variables if not already present
     if 'current_question' not in st.session_state:
         st.session_state.current_question = 0
     if 'score' not in st.session_state:
         st.session_state.score = 0
 
-    # Display the current question
-    question_data = data.loc[st.session_state.current_question]
-    st.title(question_data['Learning Objective'])
-    st.write(question_data['Question'])
-    options_dict = {
-        question_data["Option A (Correct)"]: "Feedback A",
-        question_data["Option B (Incorrect)"]: "Feedback B",
-        question_data["Option C (Incorrect)"]: "Feedback C",
-    }
-    options = list(options_dict.keys())
-    random.shuffle(options)
+    # If the data is not empty, display the questions
+    if not st.session_state.data.empty:
+        question_data = st.session_state.data.loc[st.session_state.current_question]
+        st.write(f"Question {st.session_state.current_question + 1}/{len(st.session_state.data)}")
+        st.title(question_data['Learning Objective'])
+        st.write(question_data['Question'])
 
-    # Radio buttons for options
-    selected_option = st.radio("Choose an answer:", options)
+        # Create shuffled options and store them
+        if f'options_{st.session_state.current_question}' not in st.session_state:
+            options_dict = {
+                "A": question_data["Option A (Correct)"],
+                "B": question_data["Option B (Incorrect)"],
+                "C": question_data["Option C (Incorrect)"],
+            }
+            options = list(options_dict.values())
+            random.shuffle(options)
+            st.session_state[f'options_{st.session_state.current_question}'] = options
 
-    # Submit button for the answer
-    if st.button("Submit Answer"):
-        if "Correct" in selected_option:
-            st.session_state.score += 1
-            st.success("Correct! " + data.loc[st.session_state.current_question, options_dict[selected_option]])
-        else:
-            correct_option = question_data["Option A (Correct)"]
-            st.error(f"Wrong! The correct answer was {correct_option}.\nFeedback: {data.loc[st.session_state.current_question, options_dict[selected_option]]}")
-        
-        # Move to next question or end quiz
-        if st.session_state.current_question < len(data) - 1:
-            st.session_state.current_question += 1
-        else:
-            st.write("Quiz completed! Your score is:", st.session_state.score)
-            st.session_state.current_question = 0  # Reset for next run
-            st.session_state.score = 0  # Reset score
+        # Use radio buttons for options
+        selected_option = st.radio("Choose an answer:", st.session_state[f'options_{st.session_state.current_question}'])
+
+        # Submit button for the answer
+        if st.button("Submit Answer"):
+            correct_answer = question_data["Option A (Correct)"]
+            if selected_option == correct_answer:
+                st.session_state.score += 1
+                st.success(f"Correct! The answer is indeed: {correct_answer}")
+            else:
+                st.error(f"Wrong! The correct answer was: {correct_answer}")
+
+            # Move to next question or end quiz
+            if st.session_state.current_question < len(st.session_state.data) - 1:
+                st.session_state.current_question += 1
+            else:
+                st.write(f"Quiz completed! Your final score is: {st.session_state.score}/{len(st.session_state.data)}")
+                st.session_state.current_question = 0  # Reset for next run
+                st.session_state.score = 0  # Reset score
+                del st.session_state.data  # Optionally clear data to reload a new quiz
 
 if __name__ == "__main__":
     main()
