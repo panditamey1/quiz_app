@@ -18,9 +18,18 @@ def gen_quiz(question_number,df, key="my-form"):
     form.write(f"Question {question_number + 1}")
     form.write(df.loc[question, "Question"])
     # Learning Objective,Question,Option A (Correct),Option B (Incorrect),Option C (Incorrect),Feedback A,Feedback B,Feedback C
-
+    # create dictionary of options and then shuffle
+    options_dict = {
+        df.loc[question, "Option A (Correct)"]: df.loc[question, "Feedback A"],
+        df.loc[question, "Option B (Incorrect)"]: df.loc[question, "Feedback B"],
+        df.loc[question, "Option C (Incorrect)"]: df.loc[question, "Feedback C"],
+    }
+    list_of_options = list(options_dict.items())
+    random.shuffle(list_of_options)
+    
     correct_answer = df.loc[question, "Option A (Correct)"]
     incorrect_answers = df.loc[question, ["Option B (Incorrect)", "Option C (Incorrect)"]].dropna()
+
     options = [correct_answer] + list(incorrect_answers)
     random.shuffle(options)
 
@@ -29,12 +38,14 @@ def gen_quiz(question_number,df, key="my-form"):
     if submit:
         if selected_answer == correct_answer:
             st.write("Correct!")
-            st.info("Explanation: " + df.loc[question, "Explanation"])
+            st.info("Explanation: " + options_dict[correct_answer])
         else:
             st.write(f"Wrong! The correct answer is {correct_answer}")
-            st.info("Explanation: " + df.loc[question, "Explanation"])
-        if question_number < len(df) - 1:
-            form.write("Next question")
+            st.info("Explanation: " + df.loc[question, 'Feedback A'])
+            st.info ("Feedback for other options:")
+            for option in incorrect_answers:
+                st.info(f"{option}: {options_dict[option]}")
+
 
 
 
@@ -53,10 +64,11 @@ def main():
 
     # Randomize the order of the rows
     df = df.sample(frac=1).reset_index(drop=True)
+
+    form2 = st.form(key="my-form-2")
     curr_question = st.number_input(
             "Question Number:", min_value=0, max_value=len(df)-1, value=0, step=1
-        )
-    form2 = st.form(key="my-form-2")
+        )    
     gen_quiz(curr_question,df)
     next_question_button = form2.form_submit_button("Next Question")
     if next_question_button:
