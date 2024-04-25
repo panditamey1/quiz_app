@@ -56,10 +56,10 @@ def main():
         os.makedirs(csvs_folder)
         # give option to upload files
         st.write("Please upload the CSV files to the 'csvs' folder")
-    df = load_csvs(csvs_folder)
+    data = load_csvs(csvs_folder)
 
     # Randomize the order of the rows
-    df = df.sample(frac=1).reset_index(drop=True)
+    data = data.sample(frac=1).reset_index(drop=True)
     st.title("Quiz App")
     st.session_state.question_number = 0
     question = st.session_state.question_number
@@ -87,10 +87,7 @@ def main():
 
 
     # Load the CSV file
-    data = pd.read_csv('quiz_data.csv')
 
-    # Shuffle the rows of the dataframe
-    data = data.sample(frac=1).reset_index(drop=True)
 
     # Initialize session state variables
     if 'current_question' not in st.session_state:
