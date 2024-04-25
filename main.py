@@ -32,6 +32,8 @@ def main():
         st.session_state.current_question = 0
     if 'score' not in st.session_state:
         st.session_state.score = 0
+    if 'selected_option' not in st.session_state:
+        st.session_state.selected_option = None
 
     # If the data is not empty, display the questions
     if not st.session_state.data.empty:
@@ -52,10 +54,13 @@ def main():
             st.session_state[f'options_{st.session_state.current_question}'] = options
 
         # Use radio buttons for options
-        selected_option = st.radio("Choose an answer:", st.session_state[f'options_{st.session_state.current_question}'])
+        selected_option = st.radio("Choose an answer:",
+                                   st.session_state[f'options_{st.session_state.current_question}'],
+                                   key=f'radio_{st.session_state.current_question}')
 
         # Submit button for the answer
         if st.button("Submit Answer"):
+            st.session_state.selected_option = selected_option  # Store the selected option
             correct_answer = question_data["Option A (Correct)"]
             if selected_option == correct_answer:
                 st.session_state.score += 1
@@ -63,9 +68,10 @@ def main():
             else:
                 st.error(f"Wrong! The correct answer was: {correct_answer}")
 
-            # Move to next question or end quiz
+            # Advance to the next question
             if st.session_state.current_question < len(st.session_state.data) - 1:
                 st.session_state.current_question += 1
+                st.experimental_rerun()  # Force rerun to refresh the state
             else:
                 st.write(f"Quiz completed! Your final score is: {st.session_state.score}/{len(st.session_state.data)}")
                 st.session_state.current_question = 0  # Reset for next run
