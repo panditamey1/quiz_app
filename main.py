@@ -30,8 +30,6 @@ def main():
         st.session_state.current_question = 0
     if 'score' not in st.session_state:
         st.session_state.score = 0
-    if 'advance' not in st.session_state:
-        st.session_state.advance = False
 
     # Display the current question
     question_data = data.loc[st.session_state.current_question]
@@ -45,20 +43,19 @@ def main():
     options = list(options_dict.keys())
     random.shuffle(options)
 
-    # Option buttons and feedback display
-    def handle_answer(index):
-        option_chosen = options[index]
-        if "Correct" in option_chosen:
+    # Radio buttons for options
+    selected_option = st.radio("Choose an answer:", options)
+
+    # Submit button for the answer
+    if st.button("Submit Answer"):
+        if "Correct" in selected_option:
             st.session_state.score += 1
-            st.success("Correct! " + data.loc[st.session_state.current_question, options_dict[option_chosen]])
+            st.success("Correct! " + data.loc[st.session_state.current_question, options_dict[selected_option]])
         else:
-            st.error(f"Wrong! The correct answer was {data.loc[st.session_state.current_question, 'Option A (Correct)']}.\nFeedback: {data.loc[st.session_state.current_question, options_dict[option_chosen]]}")
-
-    for i, option in enumerate(options):
-        st.button(option.split('(')[0], on_click=handle_answer, args=(i,))
-
-    # Next question button
-    if st.button('Next Question'):
+            correct_option = question_data["Option A (Correct)"]
+            st.error(f"Wrong! The correct answer was {correct_option}.\nFeedback: {data.loc[st.session_state.current_question, options_dict[selected_option]]}")
+        
+        # Move to next question or end quiz
         if st.session_state.current_question < len(data) - 1:
             st.session_state.current_question += 1
         else:
