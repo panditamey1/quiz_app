@@ -58,26 +58,27 @@ def main():
         st.write("Please upload the CSV files to the 'csvs' folder")
 
     st.title("Quiz App")
-
-    df = load_csvs(csvs_folder)
-
-    # Randomize the order of the rows
-    df = df.sample(frac=1).reset_index(drop=True)
-
-    # form2 = st.form(key="my-form-2")
     st.session_state.question_number = 0
-    # next_question = form2.number_input(
-    #     "Question Number:", min_value=0, max_value=len(df)-1, value=st.session_state.question_number, key="question_number"
-    # )
-    
-    
-    # next_question_button = form2.form_submit_button("Next Question")
-    # if next_question_button:
-    #     next_question += 1
-    #     st.session_state.question_number = next_question
-    
     question = st.session_state.question_number
     if st.session_state.question_number == 0:
+        df = load_csvs(csvs_folder)
+
+        # Randomize the order of the rows
+        df = df.sample(frac=1).reset_index(drop=True)
+
+        # form2 = st.form(key="my-form-2")
+        
+        # next_question = form2.number_input(
+        #     "Question Number:", min_value=0, max_value=len(df)-1, value=st.session_state.question_number, key="question_number"
+        # )
+        
+        
+        # next_question_button = form2.form_submit_button("Next Question")
+        # if next_question_button:
+        #     next_question += 1
+        #     st.session_state.question_number = next_question
+        
+
         gen_quiz(st.session_state.question_number,df)
     next_question_button = st.button("Next Question")
     if next_question_button:
