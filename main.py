@@ -98,18 +98,33 @@ def main():
     # Display the current question
     st.title(data.loc[st.session_state.current_question, 'Learning Objective'])
     st.write(data.loc[st.session_state.current_question, 'Question'])
+    options_dict = {
+        data.loc[st.session_state.current_question, "Option A (Correct)"]: data.loc[st.session_state.current_question, "Feedback A"],
+        data.loc[st.session_state.current_question, "Option B (Incorrect)"]: data.loc[st.session_state.current_question, "Feedback B"],
+        data.loc[st.session_state.current_question, "Option C (Incorrect)"]: data.loc[st.session_state.current_question, "Feedback C"],
+    }
+    list_of_options = list(options_dict.items())
+    random.shuffle(list_of_options)
+    
+    correct_answer = data.loc[st.session_state.current_question, "Option A (Correct)"]
+    incorrect_answers = data.loc[st.session_state.current_question, ["Option B (Incorrect)", "Option C (Incorrect)"]].dropna()
+
+    options = [correct_answer] + list(incorrect_answers)
+    random.shuffle(options)
 
     # Option buttons
-    options = ['Option A (Correct)', 'Option B (Incorrect)', 'Option C (Incorrect)']
-    random.shuffle(options)  # Shuffle options
+
     feedbacks = ['Feedback A', 'Feedback B', 'Feedback C']
     def handle_answer(index):
-        if "Correct" in options[index]:
+        if "Correct" in options_dict[options[index]]:
             st.session_state.score += 1
-            st.success("Correct! " + data.loc[st.session_state.current_question, feedbacks[index]])
+            st.success("Correct! " + data.loc[st.session_state.current_question, options_dict[options[index]]])
         else:
-            st.error("Wrong! " + data.loc[st.session_state.current_question, feedbacks[index]])
-        
+            # st.error("Wrong! " + data.loc[st.session_state.current_question, options_dict[options[index]]])
+            st.info("Correct answer: " + correct_answer, data.loc[st.session_state.current_question, 'Feedback A'])
+            st.info("Feedback for other options:")
+            for option in incorrect_answers:
+                st.info(option + ": " + data.loc[st.session_state.current_question, options_dict[option]])        
         if st.session_state.current_question < len(data) - 1:
             st.session_state.current_question += 1
         else:
